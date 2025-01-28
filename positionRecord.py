@@ -2,8 +2,18 @@ from fairino import Robot
 import time
 #Grabar la posicion en joint
 class PositionRecorder:
-    def __init__(self, robot_ip, duration_seconds):
-        self.robot = Robot.RPC(robot_ip)
+    """
+    Graba las posiciónes del robot por un tiempo determinado y las guarda en un archivo .txt
+    
+    Args:
+        robot_ip(String): ip para concectar al robot. Debe ser '192.168.58.2'
+        duration_seconds(Float): Duración de la grabación en segundos.
+        
+    Returns:
+        None
+    """
+    def __init__(self, robot_ip , duration_seconds):
+        self.robot = Robot.RPC(robot_ip) #Conectar con el cobot
         self.positions = []  # Lista para almacenar las posiciones
         self.duration_seconds = duration_seconds  # Tiempo total de grabación
 
@@ -15,14 +25,14 @@ class PositionRecorder:
 
         self.robot.DragTeachSwitch(1)  # Modo aprendizaje (drag teach)
         print("Robot en modo aprendizaje. Iniciando grabación de posiciones...")
-
         start_time = time.time()
+
         while (time.time() - start_time) < self.duration_seconds:
-            # Obtener posición actual del robot
+            # Obtener posición actual del robot en joint
             position = self.robot.GetActualJointPosDegree()
             self.positions.append(position[1])
 
-            # Esperar 0.5 ms
+            # Esperar 50 ms
             time.sleep(0.05)
         self.robot.DragTeachSwitch(0) # Salimos de modo aprendizaje
 
@@ -38,6 +48,7 @@ if __name__ == '__main__':
     robot_ip = '192.168.58.2'
     duration_seconds = 15  # Cambia este valor según sea necesario
 
+    #Corremos el codigo
     recorder = PositionRecorder(robot_ip, duration_seconds)
     print("Iniciando grabación de posiciones...")
     recorder.record_positions()

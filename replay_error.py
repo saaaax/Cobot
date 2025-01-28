@@ -1,16 +1,23 @@
 from fairino import Robot
 import error
-robot=Robot.RPC('192.168.58.2')
-
+#definir el error en x,y,z en mm
 e=[10,0,0]
 
-from fairino import Robot
-import time
-
 class SplineReplayer:
-    def __init__(self, robot_ip, position_file, downsample_factor=5):
-        self.robot = Robot.RPC(robot_ip)
-        self.position_file = position_file
+    """
+    Reproduce las posiciones de un archivo .txt con la función Spline del cobot
+    
+    Args:
+        robot_ip(String): ip para concectar al robot. Debe ser '192.168.58.2'
+        position_file(String): nombre del archivo donde están las posiciones
+        downsample_factor(int): Factor para reducir las posiciones
+        
+    Returns:
+        None
+    """
+    def __init__(self, robot_ip, position_file, downsample_factor):
+        self.robot = Robot.RPC(robot_ip) #Conectarse con el robot
+        self.position_file = position_file #Archivo con el recorrido
         self.downsample_factor = downsample_factor  # Factor para reducir puntos
         self.tool = 0  # Sistema de coordenadas de la herramienta
         self.user = 0  # Sistema de coordenadas del usuario
@@ -22,8 +29,8 @@ class SplineReplayer:
             for line in f:
                 # Convertir cada línea a una lista de floats y redondear a 3 decimales
                 position = [round(float(x), 3) for x in line.strip().strip("[]").split(',')]
-                pos_error= error.corregir(position,e)
-                pos=  [round(num, 3) for num in pos_error]
+                pos_error= error.corregir(position,e) # Arreglar el error 
+                pos=  [round(num, 3) for num in pos_error]# Redondear nuevamente
                 self.positions.append(pos)
         print(f"Se cargaron {len(self.positions)} posiciones del archivo {self.position_file}.")
 
@@ -56,8 +63,9 @@ if __name__ == '__main__':
     position_file = 'presboton.txt'  # Archivo generado previamente
 
     # Configuración del factor de submuestreo
-    downsample_factor = 2  # Tomar 1 de cada 5 posiciones para reducir puntos
+    downsample_factor = 2  # Tomar 1 de cada n posiciones para reducir puntos
 
+    # Corremos el código
     replayer = SplineReplayer(robot_ip, position_file, downsample_factor)
     replayer.load_positions()
     replayer.downsample_positions()
